@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .form-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #fdfdfd;
+        }
+        #transactionList, #summaryView {
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .transaction-item {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .summary-item {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Transaction Tracker</h1>
+
+        <div class="form-section">
+            <h2>Record New Transaction</h2>
+            <form id="transactionForm">
+                <label for="platform">Platform:</label>
+                <select id="platform" name="platform" required>
+                    <option value="GCash">GCash</option>
+                    <option value="Maya">Maya</option>
+                </select>
+
+                <label for="customer">Customer (Name or Number):</label>
+                <input type="text" id="customer" name="customer" placeholder="Enter name or number" required>
+
+                <label for="transactionType">Transaction Type:</label>
+                <select id="transactionType" name="transactionType" required>
+                    <option value="Cash-in">Cash-in</option>
+                    <option value="Cash-out">Cash-out</option>
+                    <option value="Load">Load</option>
+                    <option value="Bills">Bills</option>
+                </select>
+
+                <label for="amount">Amount (₱):</label>
+                <input type="number" id="amount" name="amount" step="0.01" required>
+                <select id="commonAmounts" style="width: 100%; margin-top: 5px;">
+                    <option value="">Select common amount</option>
+                    <option value="20">₱20</option>
+                    <option value="50">₱50</option>
+                    <option value="100">₱100</option>
+                    <option value="500">₱500</option>
+                    <option value="1000">₱1000</option>
+                </select>
+
+                <label for="profit">Profit (₱):</label>
+                <input type="number" id="profit" name="profit" step="0.01" required>
+
+                <button type="submit">Add Transaction</button>
+            </form>
+        </div>
+
+        <div id="summaryView">
+            <h2>Dashboard</h2>
+            
+            <!-- Wallet and Cash Balance -->
+            <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: 5px; background-color: #f0f8ff;">
+                <h3>Financial Overview</h3>
+                <div class="summary-item">Common Wallet: <span id="commonWallet">₱0.00</span></div>
+                <div class="summary-item">Cash Balance: <span id="cashBalance">₱0.00</span></div>
+            </div>
+            
+            <!-- Today's Summary -->
+            <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: 5px; background-color: #e8f5e8;">
+                <h3>Today's Summary</h3>
+                <div class="summary-item">Total Profit: <span id="totalProfitToday">₱0.00</span></div>
+                <div class="summary-item">GCash Profit: <span id="gcashProfitToday">₱0.00</span></div>
+                <div class="summary-item">Maya Profit: <span id="mayaProfitToday">₱0.00</span></div>
+                <div class="summary-item">Total Transactions: <span id="totalTransactionsToday">0</span></div>
+            </div>
+            
+            <!-- This Week's Summary -->
+            <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: 5px; background-color: #e8f0ff;">
+                <h3>This Week's Summary</h3>
+                <div class="summary-item">Total Profit: <span id="totalProfitWeek">₱0.00</span></div>
+                <div class="summary-item">GCash Profit: <span id="gcashProfitWeek">₱0.00</span></div>
+                <div class="summary-item">Maya Profit: <span id="mayaProfitWeek">₱0.00</span></div>
+                <div class="summary-item">Total Transactions: <span id="totalTransactionsWeek">0</span></div>
+            </div>
+            
+            <!-- Transaction Type Breakdown -->
+            <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: 5px; background-color: #fff8e1;">
+                <h3>Transaction Type Breakdown (Today)</h3>
+                <div id="transactionTypeBreakdown"></div>
+            </div>
+        </div>
+
+        <div id="transactionList">
+            <h2>All Transactions</h2>
+            
+            <!-- Data Export/Import Section -->
+            <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: 5px; background-color: #fdfdfd;">
+                <h3>Data Management</h3>
+                
+                <!-- Financial Actions Dropdown -->
+                <div style="margin-bottom: 15px;">
+                    <label for="financialActions" style="display: block; margin-bottom: 5px; font-weight: bold;">Financial Actions:</label>
+                    <select id="financialActions" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px;">
+                        <option value="">Select an action...</option>
+                        <option value="addFund">Add Fund to Wallet</option>
+                        <option value="withdrawCash">Withdraw from Cash</option>
+                        <option value="transferToCash">Transfer Cash to Wallet</option>
+                        <option value="exportReport">Export Text Report</option>
+                    </select>
+                    <button onclick="executeFinancialAction()" style="width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 15px;">
+                        Execute Action
+                    </button>
+                </div>
+                
+                <!-- Data Backup/Restore -->
+                <button onclick="exportData()" style="background-color: #28a745; margin-bottom: 10px;">Export Data</button>
+                <br>
+                <input type="file" id="importFile" accept=".json" style="margin-bottom: 10px;">
+                <button onclick="importData()" style="background-color: #ffc107; color: #000; margin-bottom: 10px;">Import Data</button>
+                <br>
+                <button onclick="clearAllData()" style="background-color: #dc3545; color: white; margin-bottom: 10px;">Clear All Data</button>
+                <br>
+                <small>Export: Download your data as a backup file<br>Import: Upload a previously exported backup file<br>Clear: Delete all stored transactions (cannot be undone)</small>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label for="filterPlatform">Filter by Platform:</label>
+                <select id="filterPlatform" style="width: calc(100% - 20px);">
+                    <option value="all">All</option>
+                    <option value="GCash">GCash</option>
+                    <option value="Maya">Maya</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="filterTransactionType">Filter by Transaction Type:</label>
+                <select id="filterTransactionType" style="width: calc(100% - 20px);">
+                    <option value="all">All</option>
+                    <option value="Cash-in">Cash-in</option>
+                    <option value="Cash-out">Cash-out</option>
+                    <option value="Load">Load</option>
+                    <option value="Bills">Bills</option>
+                </select>
+            </div>
+            <div id="transactionsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript will go here for form submission, local storage, and display logic
+    </script>
+</body>
+</html>
+
+
+
+
+<script>
+    const STORAGE_KEY = 'transactionTrackerData';
+
+    // Function to load all data from local storage
+    function loadData() {
+        const transactions = JSON.parse(localStorage.getItem('transactionTrackerData') || '[]');
+        const commonWallet = parseFloat(localStorage.getItem('commonWallet') || '0');
+        const cashBalance = parseFloat(localStorage.getItem('cashBalance') || '0');
+        return { transactions, commonWallet, cashBalance };
+    }
+
+    // Function to save transactions to local storage
+    function saveTransactions(transactions) {
+        localStorage.setItem('transactionTrackerData', JSON.stringify(transactions));
+    }
+
+    // Save wallet and cash balance to localStorage
+    function saveFinancialData(commonWallet, cashBalance) {
+        localStorage.setItem('commonWallet', commonWallet.toString());
+        localStorage.setItem('cashBalance', cashBalance.toString());
+    }
+
+    // Update wallet and cash balance display
+    function updateFinancialDisplay() {
+        const { commonWallet, cashBalance } = loadData();
+        document.getElementById('commonWallet').textContent = `₱${commonWallet.toFixed(2)}`;
+        document.getElementById('cashBalance').textContent = `₱${cashBalance.toFixed(2)}`;
+    }
+
+    // Function to render transactions and summary
+    function renderApp() {
+        const { transactions } = loadData();
+        updateFinancialDisplay(); // Update wallet and cash balance display
+        
+        const filterPlatform = document.getElementById('filterPlatform').value;
+        const filterTransactionType = document.getElementById('filterTransactionType').value;
+        const transactionsContainer = document.getElementById('transactionsContainer');
+        transactionsContainer.innerHTML = ''; // Clear previous list
+
+        let totalProfitToday = 0;
+        let gcashProfitToday = 0;
+        let mayaProfitToday = 0;
+        let totalTransactionsToday = 0;
+        
+        let totalProfitWeek = 0;
+        let gcashProfitWeek = 0;
+        let mayaProfitWeek = 0;
+        let totalTransactionsWeek = 0;
+        
+        const transactionTypeCount = {
+            'Cash-in': 0,
+            'Cash-out': 0,
+            'Load': 0,
+            'Bills': 0
+        };
+
+        const today = new Date();
+        const todayStr = today.toDateString();
+        
+        // Calculate start of week (Sunday)
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        transactions.filter(transaction => {
+            const platformMatch = filterPlatform === 'all' || transaction.platform === filterPlatform;
+            const typeMatch = filterTransactionType === 'all' || transaction.transactionType === filterTransactionType;
+            return platformMatch && typeMatch;
+        }).forEach((transaction, index) => {
+            const transactionDiv = document.createElement('div');
+            transactionDiv.className = 'transaction-item';
+            transactionDiv.innerHTML = `
+                <strong>${transaction.platform}</strong> - ${transaction.transactionType}<br>
+                Customer: ${transaction.customer}<br>
+                Amount: ₱${parseFloat(transaction.amount).toFixed(2)}<br>
+                Profit: ₱${parseFloat(transaction.profit).toFixed(2)}<br>
+                Date: ${new Date(transaction.timestamp).toLocaleString()}<br>
+                <button onclick="removeTransaction('${transaction.timestamp}')" 
+                        style="background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-top: 10px; width: 100%;">
+                    Delete Transaction
+                </button>
+            `;
+            transactionsContainer.prepend(transactionDiv); // Add new transactions at the top
+
+            const transactionDate = new Date(transaction.timestamp);
+            const transactionDateStr = transactionDate.toDateString();
+            const profit = parseFloat(transaction.profit);
+
+            // Calculate daily profit and counts
+            if (transactionDateStr === todayStr) {
+                totalProfitToday += profit;
+                totalTransactionsToday++;
+                transactionTypeCount[transaction.transactionType]++;
+                
+                if (transaction.platform === 'GCash') {
+                    gcashProfitToday += profit;
+                } else if (transaction.platform === 'Maya') {
+                    mayaProfitToday += profit;
+                }
+            }
+            
+            // Calculate weekly profit and counts
+            if (transactionDate >= startOfWeek) {
+                totalProfitWeek += profit;
+                totalTransactionsWeek++;
+                
+                if (transaction.platform === 'GCash') {
+                    gcashProfitWeek += profit;
+                } else if (transaction.platform === 'Maya') {
+                    mayaProfitWeek += profit;
+                }
+            }
+        });
+
+        // Update dashboard displays
+        document.getElementById('totalProfitToday').textContent = `₱${totalProfitToday.toFixed(2)}`;
+        document.getElementById('gcashProfitToday').textContent = `₱${gcashProfitToday.toFixed(2)}`;
+        document.getElementById('mayaProfitToday').textContent = `₱${mayaProfitToday.toFixed(2)}`;
+        document.getElementById('totalTransactionsToday').textContent = totalTransactionsToday;
+        
+        document.getElementById('totalProfitWeek').textContent = `₱${totalProfitWeek.toFixed(2)}`;
+        document.getElementById('gcashProfitWeek').textContent = `₱${gcashProfitWeek.toFixed(2)}`;
+        document.getElementById('mayaProfitWeek').textContent = `₱${mayaProfitWeek.toFixed(2)}`;
+        document.getElementById('totalTransactionsWeek').textContent = totalTransactionsWeek;
+        
+        // Update transaction type breakdown
+        const breakdownContainer = document.getElementById('transactionTypeBreakdown');
+        breakdownContainer.innerHTML = '';
+        Object.entries(transactionTypeCount).forEach(([type, count]) => {
+            const div = document.createElement('div');
+            div.className = 'summary-item';
+            div.innerHTML = `${type}: ${count} transactions`;
+            breakdownContainer.appendChild(div);
+        });
+    }
+
+    // Handle form submission
+    document.getElementById('transactionForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const { transactions, commonWallet, cashBalance } = loadData();
+        
+        const amount = parseFloat(form.amount.value);
+        const profit = parseFloat(form.profit.value);
+        const transactionType = form.transactionType.value;
+        
+        let newCommonWallet = commonWallet;
+        let newCashBalance = cashBalance;
+        
+        // Apply financial logic based on transaction type
+        switch(transactionType) {
+            case 'Cash-in':
+                // Amount and Profit go to Cash Balance
+                newCashBalance += amount + profit;
+                break;
+            case 'Cash-out':
+                // Amount goes to Common Wallet, (Amount - Profit) deducted from Cash Balance
+                newCommonWallet += amount;
+                newCashBalance -= (amount - profit);
+                break;
+            case 'Load':
+                // Amount deducted from Common Wallet, Profit added to Cash Balance
+                newCommonWallet -= amount;
+                newCashBalance += profit;
+                break;
+            case 'Bills':
+                // Amount deducted from Common Wallet, Profit added to Cash Balance
+                newCommonWallet -= amount;
+                newCashBalance += profit;
+                break;
+        }
+        
+        // Check for insufficient funds
+        if (newCommonWallet < 0) {
+            alert('Insufficient funds in Common Wallet for this transaction!');
+            return;
+        }
+        if (newCashBalance < 0) {
+            alert('Insufficient Cash Balance for this transaction!');
+            return;
+        }
+
+        const newTransaction = {
+            platform: form.platform.value,
+            customer: form.customer.value,
+            transactionType: transactionType,
+            amount: amount,
+            profit: profit,
+            timestamp: new Date().toISOString() // Auto-generated timestamp
+        };
+
+        transactions.push(newTransaction);
+        saveTransactions(transactions);
+        saveFinancialData(newCommonWallet, newCashBalance);
+
+        form.reset(); // Clear the form
+        renderApp(); // Re-render the list and summary
+    });
+
+    // Handle common amounts dropdown
+    document.getElementById('commonAmounts').addEventListener('change', function() {
+        const amountInput = document.getElementById('amount');
+        if (this.value) {
+            amountInput.value = this.value;
+        }
+    });
+
+    // Handle filters
+    document.getElementById('filterPlatform').addEventListener('change', renderApp);
+    document.getElementById('filterTransactionType').addEventListener('change', renderApp);
+
+    // Execute financial action based on dropdown selection
+    function executeFinancialAction() {
+        const action = document.getElementById('financialActions').value;
+        
+        if (!action) {
+            alert('Please select an action first.');
+            return;
+        }
+        
+        switch(action) {
+            case 'addFund':
+                addFundToWallet();
+                break;
+            case 'withdrawCash':
+                withdrawFromCash();
+                break;
+            case 'transferToCash':
+                transferCashToWallet();
+                break;
+            case 'exportReport':
+                exportTextReport();
+                break;
+        }
+        
+        // Reset dropdown
+        document.getElementById('financialActions').value = '';
+    }
+
+    // Add fund to wallet
+    function addFundToWallet() {
+        const amount = prompt('Enter amount to add to Common Wallet:');
+        if (amount === null) return; // User cancelled
+        
+        const amountNum = parseFloat(amount);
+        if (isNaN(amountNum) || amountNum <= 0) {
+            alert('Please enter a valid positive amount.');
+            return;
+        }
+        
+        const { commonWallet, cashBalance } = loadData();
+        const newCommonWallet = commonWallet + amountNum;
+        
+        saveFinancialData(newCommonWallet, cashBalance);
+        updateFinancialDisplay();
+        
+        alert(`₱${amountNum.toFixed(2)} added to Common Wallet successfully!`);
+    }
+
+    // Withdraw from cash
+    function withdrawFromCash() {
+        const { commonWallet, cashBalance } = loadData();
+        
+        if (cashBalance <= 0) {
+            alert('No cash available to withdraw.');
+            return;
+        }
+        
+        const amount = prompt(`Enter amount to withdraw from Cash Balance (Available: ₱${cashBalance.toFixed(2)}):`);
+        if (amount === null) return; // User cancelled
+        
+        const amountNum = parseFloat(amount);
+        if (isNaN(amountNum) || amountNum <= 0) {
+            alert('Please enter a valid positive amount.');
+            return;
+        }
+        
+        if (amountNum > cashBalance) {
+            alert('Insufficient cash balance for this withdrawal.');
+            return;
+        }
+        
+        const newCashBalance = cashBalance - amountNum;
+        
+        saveFinancialData(commonWallet, newCashBalance);
+        updateFinancialDisplay();
+        
+        alert(`₱${amountNum.toFixed(2)} withdrawn from Cash Balance successfully!`);
+    }
+
+    // Transfer cash to wallet
+    function transferCashToWallet() {
+        const { commonWallet, cashBalance } = loadData();
+        
+        if (cashBalance <= 0) {
+            alert('No cash available to transfer.');
+            return;
+        }
+        
+        const amount = prompt(`Enter amount to transfer from Cash to Wallet (Available: ₱${cashBalance.toFixed(2)}):`);
+        if (amount === null) return; // User cancelled
+        
+        const amountNum = parseFloat(amount);
+        if (isNaN(amountNum) || amountNum <= 0) {
+            alert('Please enter a valid positive amount.');
+            return;
+        }
+        
+        if (amountNum > cashBalance) {
+            alert('Insufficient cash balance for this transfer.');
+            return;
+        }
+        
+        const newCashBalance = cashBalance - amountNum;
+        const newCommonWallet = commonWallet + amountNum;
+        
+        saveFinancialData(newCommonWallet, newCashBalance);
+        updateFinancialDisplay();
+        
+        alert(`₱${amountNum.toFixed(2)} transferred from Cash Balance to Common Wallet successfully!`);
+    }
+
+    // Export text report function
+    function exportTextReport() {
+        const { transactions, commonWallet, cashBalance } = loadData();
+        const currentDate = new Date();
+        const reportDate = currentDate.toLocaleDateString();
+        const reportTime = currentDate.toLocaleTimeString();
+        
+        let report = `GCASH & MAYA TRANSACTION REPORT\n`;
+        report += `Generated on: ${reportDate} at ${reportTime}\n`;
+        report += `${'='.repeat(50)}\n\n`;
+        
+        // Financial Overview
+        report += `FINANCIAL OVERVIEW\n`;
+        report += `${'='.repeat(20)}\n`;
+        report += `Common Wallet Balance: ₱${commonWallet.toFixed(2)}\n`;
+        report += `Cash Balance: ₱${cashBalance.toFixed(2)}\n`;
+        report += `Total Balance: ₱${(commonWallet + cashBalance).toFixed(2)}\n\n`;
+        
+        // Summary Statistics
+        const today = new Date();
+        const todayStr = today.toDateString();
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - today.getDay());
+        
+        let totalProfitToday = 0;
+        let totalProfitWeek = 0;
+        let gcashProfitToday = 0;
+        let mayaProfitToday = 0;
+        let gcashProfitWeek = 0;
+        let mayaProfitWeek = 0;
+        let transactionCounts = { 'Cash-in': 0, 'Cash-out': 0, 'Load': 0, 'Bills': 0 };
+        
+        transactions.forEach(transaction => {
+            const transactionDate = new Date(transaction.timestamp);
+            const profit = parseFloat(transaction.profit);
+            
+            if (transactionDate.toDateString() === todayStr) {
+                totalProfitToday += profit;
+                if (transaction.platform === 'GCash') gcashProfitToday += profit;
+                if (transaction.platform === 'Maya') mayaProfitToday += profit;
+                transactionCounts[transaction.transactionType]++;
+            }
+            
+            if (transactionDate >= weekStart) {
+                totalProfitWeek += profit;
+                if (transaction.platform === 'GCash') gcashProfitWeek += profit;
+                if (transaction.platform === 'Maya') mayaProfitWeek += profit;
+            }
+        });
+        
+        report += `PROFIT SUMMARY\n`;
+        report += `${'='.repeat(15)}\n`;
+        report += `Today's Total Profit: ₱${totalProfitToday.toFixed(2)}\n`;
+        report += `  - GCash Profit: ₱${gcashProfitToday.toFixed(2)}\n`;
+        report += `  - Maya Profit: ₱${mayaProfitToday.toFixed(2)}\n\n`;
+        report += `This Week's Total Profit: ₱${totalProfitWeek.toFixed(2)}\n`;
+        report += `  - GCash Profit: ₱${gcashProfitWeek.toFixed(2)}\n`;
+        report += `  - Maya Profit: ₱${mayaProfitWeek.toFixed(2)}\n\n`;
+        
+        report += `TRANSACTION TYPE BREAKDOWN (Today)\n`;
+        report += `${'='.repeat(35)}\n`;
+        Object.entries(transactionCounts).forEach(([type, count]) => {
+            report += `${type}: ${count} transactions\n`;
+        });
+        report += `\n`;
+        
+        // All Transactions
+        report += `ALL TRANSACTIONS\n`;
+        report += `${'='.repeat(18)}\n`;
+        
+        if (transactions.length === 0) {
+            report += `No transactions recorded.\n\n`;
+        } else {
+            transactions.slice().reverse().forEach((transaction, index) => {
+                const date = new Date(transaction.timestamp);
+                report += `${index + 1}. ${transaction.platform} - ${transaction.transactionType}\n`;
+                report += `   Customer: ${transaction.customer}\n`;
+                report += `   Amount: ₱${parseFloat(transaction.amount).toFixed(2)}\n`;
+                report += `   Profit: ₱${parseFloat(transaction.profit).toFixed(2)}\n`;
+                report += `   Date: ${date.toLocaleString()}\n`;
+                report += `   ${'-'.repeat(30)}\n`;
+            });
+        }
+        
+        report += `\nEnd of Report\n`;
+        report += `Total Transactions: ${transactions.length}\n`;
+        
+        // Create and download the text file
+        const reportBlob = new Blob([report], {type: 'text/plain'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(reportBlob);
+        link.download = `transaction_report_${currentDate.toISOString().split('T')[0]}.txt`;
+        link.click();
+        
+        alert('Text report exported successfully!');
+    }
+
+    // Export data function
+    function exportData() {
+        const { transactions } = loadData();
+        const dataStr = JSON.stringify(transactions, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `transaction_backup_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+    }
+
+    // Import data function
+    function importData() {
+        const fileInput = document.getElementById('importFile');
+        const file = fileInput.files[0];
+        
+        if (!file) {
+            alert('Please select a file to import.');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (Array.isArray(importedData)) {
+                    const existingTransactions = loadTransactions();
+                    const mergedTransactions = [...existingTransactions, ...importedData];
+                    saveTransactions(mergedTransactions);
+                    renderApp();
+                    alert('Data imported successfully!');
+                    fileInput.value = ''; // Clear the file input
+                } else {
+                    alert('Invalid file format. Please select a valid backup file.');
+                }
+            } catch (error) {
+                alert('Error reading file. Please select a valid backup file.');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // Clear all data function
+    function clearAllData() {
+        const confirmation = confirm('Are you sure you want to delete ALL transaction data? This action cannot be undone.\n\nIt is recommended to export your data first as a backup.');
+        
+        if (confirmation) {
+            const doubleConfirmation = confirm('This will permanently delete all your transactions. Are you absolutely sure?');
+            
+            if (doubleConfirmation) {
+                localStorage.removeItem(STORAGE_KEY);
+                renderApp();
+                alert('All transaction data has been cleared.');
+            }
+        }
+    }
+
+    // Remove specific transaction function
+    function removeTransaction(timestamp) {
+        const confirmation = confirm('Are you sure you want to delete this transaction? This action cannot be undone.');
+        
+        if (confirmation) {
+            const transactions = loadTransactions();
+            const updatedTransactions = transactions.filter(transaction => transaction.timestamp !== timestamp);
+            saveTransactions(updatedTransactions);
+            renderApp();
+            alert('Transaction deleted successfully.');
+        }
+    }
+
+    // Initial render when the page loads
+    document.addEventListener('DOMContentLoaded', renderApp);
+</script>
+
+

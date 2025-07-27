@@ -226,7 +226,8 @@
         const transactions = JSON.parse(localStorage.getItem('transactionTrackerData') || '[]');
         const commonWallet = parseFloat(localStorage.getItem('commonWallet') || '0');
         const cashBalance = parseFloat(localStorage.getItem('cashBalance') || '0');
-        return { transactions, commonWallet, cashBalance };
+        const financialActions = JSON.parse(localStorage.getItem('financialActions') || '[]');
+        return { transactions, commonWallet, cashBalance, financialActions };
     }
 
     // Function to save transactions to local storage
@@ -235,9 +236,12 @@
     }
 
     // Save wallet and cash balance to localStorage
-    function saveFinancialData(commonWallet, cashBalance) {
+    function saveFinancialData(commonWallet, cashBalance, financialActions = null) {
         localStorage.setItem('commonWallet', commonWallet.toString());
         localStorage.setItem('cashBalance', cashBalance.toString());
+        if (financialActions !== null) {
+            localStorage.setItem('financialActions', JSON.stringify(financialActions));
+        }
     }
 
     // Update wallet and cash balance display
@@ -470,10 +474,21 @@
             return;
         }
         
-        const { commonWallet, cashBalance } = loadData();
+        const { commonWallet, cashBalance, financialActions } = loadData();
         const newCommonWallet = commonWallet + amountNum;
         
-        saveFinancialData(newCommonWallet, cashBalance);
+        // Save financial action for transparency
+        const newAction = {
+            type: 'Add Fund to Wallet',
+            amount: amountNum,
+            timestamp: new Date().toISOString(),
+            description: `Added ₱${amountNum.toFixed(2)} to Common Wallet`
+        };
+        
+        const updatedActions = financialActions || [];
+        updatedActions.push(newAction);
+        
+        saveFinancialData(newCommonWallet, cashBalance, updatedActions);
         updateFinancialDisplay();
         
         alert(`₱${amountNum.toFixed(2)} added to Common Wallet successfully!`);
@@ -481,7 +496,7 @@
 
     // Withdraw from cash
     function withdrawFromCash() {
-        const { commonWallet, cashBalance } = loadData();
+        const { commonWallet, cashBalance, financialActions } = loadData();
         
         if (cashBalance <= 0) {
             alert('No cash available to withdraw.');
@@ -504,7 +519,18 @@
         
         const newCashBalance = cashBalance - amountNum;
         
-        saveFinancialData(commonWallet, newCashBalance);
+        // Save financial action for transparency
+        const newAction = {
+            type: 'Withdraw from Cash',
+            amount: amountNum,
+            timestamp: new Date().toISOString(),
+            description: `Withdrew ₱${amountNum.toFixed(2)} from Cash Balance`
+        };
+        
+        const updatedActions = financialActions || [];
+        updatedActions.push(newAction);
+        
+        saveFinancialData(commonWallet, newCashBalance, updatedActions);
         updateFinancialDisplay();
         
         alert(`₱${amountNum.toFixed(2)} withdrawn from Cash Balance successfully!`);
@@ -512,7 +538,7 @@
 
     // Transfer cash to wallet
     function transferCashToWallet() {
-        const { commonWallet, cashBalance } = loadData();
+        const { commonWallet, cashBalance, financialActions } = loadData();
         
         if (cashBalance <= 0) {
             alert('No cash available to transfer.');
@@ -536,7 +562,18 @@
         const newCashBalance = cashBalance - amountNum;
         const newCommonWallet = commonWallet + amountNum;
         
-        saveFinancialData(newCommonWallet, newCashBalance);
+        // Save financial action for transparency
+        const newAction = {
+            type: 'Transfer Cash to Wallet',
+            amount: amountNum,
+            timestamp: new Date().toISOString(),
+            description: `Transferred ₱${amountNum.toFixed(2)} from Cash Balance to Common Wallet`
+        };
+        
+        const updatedActions = financialActions || [];
+        updatedActions.push(newAction);
+        
+        saveFinancialData(newCommonWallet, newCashBalance, updatedActions);
         updateFinancialDisplay();
         
         alert(`₱${amountNum.toFixed(2)} transferred from Cash Balance to Common Wallet successfully!`);
@@ -559,6 +596,24 @@
         report += `Common Wallet Balance: ₱${commonWallet.toFixed(2)}\n`;
         report += `Cash Balance: ₱${cashBalance.toFixed(2)}\n`;
         report += `Total Balance: ₱${(commonWallet + cashBalance).toFixed(2)}\n\n`;
+        
+        // Financial Actions History
+        if (financialActions && financialActions.length > 0) {
+            report += `FINANCIAL ACTIONS HISTORY\n`;
+            report += `${'='.repeat(25)}\n`;
+            
+            financialActions.slice().reverse().forEach((action, index) => {
+                const date = new Date(action.timestamp);
+                report += `${index + 1}. ${action.type}\n`;
+                report += `   Amount: ₱${parseFloat(action.amount).toFixed(2)}\n`;
+                report += `   Date: ${date.toLocaleString()}\n`;
+                if (action.description) {
+                    report += `   Description: ${action.description}\n`;
+                }
+                report += `   ${'-'.repeat(30)}\n`;
+            });
+            report += `\n`;
+        }
         
         // Summary Statistics
         const today = new Date();
@@ -628,6 +683,9 @@
         
         report += `\nEnd of Report\n`;
         report += `Total Transactions: ${transactions.length}\n`;
+        if (financialActions && financialActions.length > 0) {
+            report += `Total Financial Actions: ${financialActions.length}\n`;
+        }
         
         // Create and download the text file
         const reportBlob = new Blob([report], {type: 'text/plain'});

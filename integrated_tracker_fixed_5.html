@@ -1,0 +1,2147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Management Suite</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Tab System Styles */
+        .tab-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .tab-header {
+            display: flex;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 16px 24px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #333;
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #2563eb;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Transaction Tracker Styles */
+        .tracker-content {
+            padding: 20px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .summary {
+            background-color: #e9f7ef;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .transaction-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+            position: relative;
+        }
+
+        .transaction-item .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .transaction-item .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .financial-overview {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filters label {
+            margin-bottom: 5px;
+        }
+
+        .filters select {
+            width: auto;
+            min-width: 120px;
+        }
+
+        /* Bill & Coin Counter Styles */
+        .counter-content {
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 600px;
+        }
+
+        .counter-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #2563eb;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .header h1 i {
+            margin-right: 12px;
+            color: #f59e0b;
+        }
+
+        .total-display {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            display: inline-block;
+            font-size: 1.25rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .total-label {
+            margin-right: 8px;
+        }
+
+        .total-amount {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .denomination-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .denomination-section h2 {
+            font-size: 1.5rem;
+            color: #374151;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .denomination-section h2 i {
+            margin-right: 12px;
+            color: #2563eb;
+        }
+
+        .denomination-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        /* Denomination Item */
+        .denomination-item {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .denomination-item:hover {
+            border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .denomination-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .denomination-label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 1.1rem;
+        }
+
+        .denomination-total {
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Counter Controls */
+        .counter-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-decrement,
+        .btn-increment {
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 50%;
+            background: #2563eb;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-decrement:hover,
+        .btn-increment:hover {
+            background: #1d4ed8;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-decrement:active,
+        .btn-increment:active {
+            transform: scale(0.95);
+        }
+
+        .count-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+            font-weight: 600;
+            background: white;
+            transition: border-color 0.2s ease;
+        }
+
+        .count-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .btn-save,
+        .btn-clear {
+            flex: 1;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-save:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-clear:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-content h3 {
+            color: #374151;
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+        }
+
+        .modal-content p {
+            color: #6b7280;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-cancel,
+        .btn-confirm {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-cancel:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-confirm {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background: #dc2626;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile Responsive Design */
+        @media (max-width: 768px) {
+            .tab-container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+            
+            .tab-button {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+            
+            .counter-container {
+                padding: 16px;
+            }
+            
+            .header {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .total-display {
+                font-size: 1.1rem;
+                padding: 14px 20px;
+            }
+            
+            .total-amount {
+                font-size: 1.3rem;
+            }
+            
+            .denomination-section {
+                padding: 20px;
+            }
+            
+            .denomination-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .denomination-item {
+                padding: 16px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .modal-content {
+                padding: 24px;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tab-container">
+        <!-- Tab Header -->
+        <div class="tab-header">
+            <button class="tab-button active" id="tracker-tab-btn">
+                <i class="fas fa-exchange-alt"></i> Transaction Tracker
+            </button>
+            <button class="tab-button" id="counter-tab-btn">
+                <i class="fas fa-coins"></i> Bill & Coin Counter
+            </button>
+        </div>
+
+        <!-- Transaction Tracker Tab -->
+        <div id="tracker-tab" class="tab-content active">
+            <div class="tracker-content">
+                <div class="container">
+                    <h1>Transaction Tracker</h1>
+
+                    <div class="form-section">
+                        <h2>Record New Transaction</h2>
+                        <form id="transactionForm">
+                            <label for="platform">Platform:</label>
+                            <select id="platform" name="platform" required>
+                                <option value="GCash">GCash</option>
+                                <option value="Maya">Maya</option>
+                            </select>
+
+                            <label for="customer">Customer (Name or Number):</label>
+                            <input type="text" id="customer" name="customer" placeholder="Enter name or number" required>
+
+                            <label for="transactionType">Transaction Type:</label>
+                            <select id="transactionType" name="transactionType" required>
+                                <option value="Cash-in">Cash-in</option>
+                                <option value="Cash-out">Cash-out</option>
+                                <option value="Load">Load</option>
+                                <option value="Bills">Bills</option>
+                            </select>
+
+                            <label for="amount">Amount (₱):</label>
+                            <input type="number" id="amount" name="amount" step="0.01" required>
+                            <select id="commonAmounts" style="width: 100%; margin-top: 5px;">
+                                <option value="">Select common amount</option>
+                                <option value="20">₱20</option>
+                                <option value="50">₱50</option>
+                                <option value="100">₱100</option>
+                                <option value="500">₱500</option>
+                                <option value="1000">₱1000</option>
+                            </select>
+
+                            <label for="profit">Profit (₱):</label>
+                            <input type="number" id="profit" name="profit" step="0.01" required>
+
+                            <button type="submit">Add Transaction</button>
+                        </form>
+                    </div>
+
+                    <div class="financial-overview">
+                        <h2>Financial Overview</h2>
+                        <p><strong>GCash Wallet:</strong> ₱<span id="gcashWallet">0.00</span></p>
+                        <p><strong>Maya Wallet:</strong> ₱<span id="mayaWallet">0.00</span></p>
+                        <p><strong>Total Wallet:</strong> ₱<span id="totalWallet">0.00</span></p>
+                        <p><strong>Cash Balance:</strong> ₱<span id="cashBalance">0.00</span></p>
+                    </div>
+
+                    <div class="summary">
+                        <h2>Today's Summary</h2>
+                        <p><strong>Total Profit:</strong> ₱<span id="totalProfit">0.00</span></p>
+                        <p><strong>GCash Profit:</strong> ₱<span id="gcashProfit">0.00</span></p>
+                        <p><strong>Maya Profit:</strong> ₱<span id="mayaProfit">0.00</span></p>
+                        <p><strong>Total Transactions:</strong> <span id="totalTransactions">0</span></p>
+                    </div>
+
+                    <div class="summary">
+                        <h2>This Week's Summary</h2>
+                        <p><strong>Total Profit:</strong> ₱<span id="weeklyTotalProfit">0.00</span></p>
+                        <p><strong>GCash Profit:</strong> ₱<span id="weeklyGcashProfit">0.00</span></p>
+                        <p><strong>Maya Profit:</strong> ₱<span id="weeklyMayaProfit">0.00</span></p>
+                        <p><strong>Total Transactions:</strong> <span id="weeklyTotalTransactions">0</span></p>
+                    </div>
+
+                    <div class="summary">
+                        <h2>Transaction Type Breakdown (Today)</h2>
+                        <p><strong>Cash-in:</strong> <span id="cashinCount">0</span> transactions</p>
+                        <p><strong>Cash-out:</strong> <span id="cashoutCount">0</span> transactions</p>
+                        <p><strong>Load:</strong> <span id="loadCount">0</span> transactions</p>
+                        <p><strong>Bills:</strong> <span id="billsCount">0</span> transactions</p>
+                    </div>
+
+                    <h2>All Transactions</h2>
+
+                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <h3>Data Management</h3>
+                        
+                        <label for="financialActions" style="color: #28a745; font-weight: bold;">Financial Actions:</label>
+                        <select id="financialActions" style="margin-bottom: 10px;">
+                            <option value="">Select an action...</option>
+                            <option value="addPlatformWallet">Add Fund to Platform Wallet</option>
+                            <option value="addCashBalance">Add Fund to Cash Balance</option>
+                            <option value="withdrawCash">Withdraw from Cash</option>
+                            <option value="transferCashToWallet">Transfer Cash to Wallet</option>
+                            <option value="transferBetweenPlatforms">Transfer between Platforms</option>
+                            <option value="exportTextReport">Export Text Report</option>
+                        </select>
+                        <button id="executeActionBtn" style="background-color: #007bff;">Execute Action</button>
+
+                        <button id="exportDataBtn" style="background-color: #28a745;">Export Data</button>
+                        <input type="file" id="importFile" accept=".json" style="margin: 10px 0;">
+                        <button id="importDataBtn" style="background-color: #ffc107; color: #000;">Import Data</button>
+                        <button id="clearAllDataBtn" style="background-color: #dc3545;">Clear All Data</button>
+                        
+                        <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                            <strong>Export:</strong> Download your data as a backup file<br>
+                            <strong>Import:</strong> Upload a previously exported backup file<br>
+                            <strong>Clear:</strong> Delete all stored transactions (cannot be undone)
+                        </p>
+                    </div>
+
+                    <div class="filters">
+                        <div>
+                            <label for="filterPlatform" style="color: #dc3545; font-weight: bold;">Filter by Platform:</label>
+                            <select id="filterPlatform">
+                                <option value="">All</option>
+                                <option value="GCash">GCash</option>
+                                <option value="Maya">Maya</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterTransactionType" style="color: #dc3545; font-weight: bold;">Filter by Transaction Type:</label>
+                            <select id="filterTransactionType">
+                                <option value="">All</option>
+                                <option value="Cash-in">Cash-in</option>
+                                <option value="Cash-out">Cash-out</option>
+                                <option value="Load">Load</option>
+                                <option value="Bills">Bills</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="transactionsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bill & Coin Counter Tab -->
+        <div id="counter-tab" class="tab-content">
+            <div class="counter-content">
+                <div class="counter-container">
+                    <header class="header">
+                        <h1><i class="fas fa-coins"></i> Bill & Coin Counter</h1>
+                        <div class="total-display">
+                            <span class="total-label">Total Value:</span>
+                            <span class="total-amount" id="grandTotal">₱0</span>
+                        </div>
+                    </header>
+
+                    <main class="main-content">
+                        <!-- Coins Section -->
+                        <section class="denomination-section">
+                            <h2><i class="fas fa-coins"></i> Coins</h2>
+                            <div class="denomination-grid">
+                                <div class="denomination-item" data-value="1" data-type="coin">
+                                    <div class="denomination-header">
+                                        <span class="denomination-label">₱1 Coin</span>
+                                        <span class="denomination-total" id="total-1">₱0</span>
+                                    </div>
+                                    <div class="counter-controls">
+                                        <button class="btn-decrement" data-denomination="1">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="count-input" id="count-1" value="0">
+                                        <button class="btn-increment" data-denomination="1">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="denomination-item" data-value="5" data-type="coin">
+                                    <div class="denomination-header">
+                                        <span class="denomination-label">₱5 Coin</span>
+                                        <span class="denomination-total" id="total-5">₱0</span>
+                                    </div>
+                                    <div class="counter-controls">
+                                        <button class="btn-decrement" data-denomination="5">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="count-input" id="count-5" value="0">
+                                        <button class="btn-increment" data-denomination="5">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="denomination-item" data-value="10" data-type="coin">
+                                    <div class="denomination-header">
+                                        <span class="denomination-label">₱10 Coin</span>
+                                        <span class="denomination-total" id="total-10">₱0</span>
+                                    </div>
+                                    <div class="counter-controls">
+                                        <button class="btn-decrement" data-denomination="10">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="count-input" id="count-10" value="0">
+                                        <button class="btn-increment" data-denomination="10">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="denomination-item" data-value="20" data-type="coin">
+                                    <div class="denomination-header">
+                                        <span class="denomination-label">₱20 Coin</span>
+                                        <span class="denomination-total" id="total-20-coin">₱0</span>
+                                    </div>
+                                    <div class="counter-controls">
+                                        <button class="btn-decrement" data-denomination="20-coin">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="count-input" id="count-20-coin" value="0">
+                                        <button class="btn-increment" data-denomination="20-coin">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Bills Section -->
+                        <section class="denomination-section">
+                            <h2><i class="fas fa-money-bill-wave"></i> Bills</h2>
+                            <div class="denomination-grid">
+                                <div class="denomination-item" data-value="20" data-type="bill">
+                                    <div class="denomination-header">
+                                        <span class="denomination-label">₱20 Bill</span>
+                                        <span class="denomination-total" id="total-20-bill">₱0</span>
+                                    </div>
+                                    <div class="counter-controls">
+                                        <button class="btn-decrement" data-denomination="20-bill">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="count-input" id="count-20-bill" value="0">
+                                        <button class="btn-increment" data-denomination="20-bill">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="denomination-item" data-value="50" data-type="bill">
+                                    <div class="denomination-header">
+                                        <span class="denomination-label">₱50 Bill</span>
+                                        <span class="denomination-total" id="total-50">₱0</span>
+                                    </div>
+                                    <div class="counter-controls">
+                                        <button class="btn-decrement" data-denomination="50">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="count-input" id="count-50" value="0">
+                                        <button class="btn-increment" data-denomination="50">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="denomination-item" data-value="100" data-type="bill">
+                                    <div class="denomination-header">
+                                        <span class="denomination-label">₱100 Bill</span>
+                                        <span class="denomination-total" id="total-100">₱0</span>
+                                    </div>
+                                    <div class="counter-controls">
+                                        <button class="btn-decrement" data-denomination="100">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="count-input" id="count-100" value="0">
+                                        <button class="btn-increment" data-denomination="100">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="denomination-item" data-value="200" data-type="bill">
+                                    <div class="denomination-header">
+                                        <span class="denomination-label">₱200 Bill</span>
+                                        <span class="denomination-total" id="total-200">₱0</span>
+                                    </div>
+                                    <div class="counter-controls">
+                                        <button class="btn-decrement" data-denomination="200">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="count-input" id="count-200" value="0">
+                                        <button class="btn-increment" data-denomination="200">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="denomination-item" data-value="500" data-type="bill">
+                                    <div class="denomination-header">
+                                        <span class="denomination-label">₱500 Bill</span>
+                                        <span class="denomination-total" id="total-500">₱0</span>
+                                    </div>
+                                    <div class="counter-controls">
+                                        <button class="btn-decrement" data-denomination="500">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="count-input" id="count-500" value="0">
+                                        <button class="btn-increment" data-denomination="500">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="denomination-item" data-value="1000" data-type="bill">
+                                    <div class="denomination-header">
+                                        <span class="denomination-label">₱1000 Bill</span>
+                                        <span class="denomination-total" id="total-1000">₱0</span>
+                                    </div>
+                                    <div class="counter-controls">
+                                        <button class="btn-decrement" data-denomination="1000">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="count-input" id="count-1000" value="0">
+                                        <button class="btn-increment" data-denomination="1000">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </main>
+
+                    <footer class="action-buttons">
+                        <button class="btn-save" id="saveBtn">
+                            <i class="fas fa-save"></i> Save Counts
+                        </button>
+                        <button class="btn-clear" id="clearBtn">
+                            <i class="fas fa-trash"></i> Clear All
+                        </button>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <h3>Confirm Clear All</h3>
+            <p>Are you sure you want to clear all counts and totals? This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel" id="cancelBtn">Cancel</button>
+                <button class="btn-confirm" id="confirmBtn">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for Transaction Tracker
+        let transactions = [];
+        let gcashWallet = 0;
+        let mayaWallet = 0;
+        let cashBalance = 0;
+        let financialActions = [];
+
+        // Global variable for Bill & Coin Counter
+        let billCoinCounter = null;
+
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to appropriate tab button
+            if (tabName === 'tracker') {
+                document.getElementById('tracker-tab-btn').classList.add('active');
+                renderApp(); // Refresh transaction tracker
+            } else if (tabName === 'counter') {
+                document.getElementById('counter-tab-btn').classList.add('active');
+                initializeBillCoinCounter(); // Initialize counter
+            }
+        }
+
+        // Transaction Tracker Functions
+        function loadData() {
+            const savedTransactions = localStorage.getItem('transactions');
+            const savedGcashWallet = localStorage.getItem('gcashWallet');
+            const savedMayaWallet = localStorage.getItem('mayaWallet');
+            const savedCashBalance = localStorage.getItem('cashBalance');
+            const savedFinancialActions = localStorage.getItem('financialActions');
+
+            if (savedTransactions) {
+                transactions = JSON.parse(savedTransactions);
+            }
+            if (savedGcashWallet) {
+                gcashWallet = parseFloat(savedGcashWallet);
+            }
+            if (savedMayaWallet) {
+                mayaWallet = parseFloat(savedMayaWallet);
+            }
+            if (savedCashBalance) {
+                cashBalance = parseFloat(savedCashBalance);
+            }
+            if (savedFinancialActions) {
+                financialActions = JSON.parse(savedFinancialActions);
+            }
+
+            return { transactions, gcashWallet, mayaWallet, cashBalance, financialActions };
+        }
+
+        function saveData() {
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            localStorage.setItem('gcashWallet', gcashWallet.toString());
+            localStorage.setItem('mayaWallet', mayaWallet.toString());
+            localStorage.setItem('cashBalance', cashBalance.toString());
+            localStorage.setItem('financialActions', JSON.stringify(financialActions));
+        }
+
+        function saveFinancialData(newGcashWallet, newMayaWallet, newCashBalance, newFinancialActions) {
+            gcashWallet = newGcashWallet;
+            mayaWallet = newMayaWallet;
+            cashBalance = newCashBalance;
+            financialActions = newFinancialActions;
+            saveData();
+        }
+
+        function updateFinancialDisplay() {
+            document.getElementById('gcashWallet').textContent = gcashWallet.toFixed(2);
+            document.getElementById('mayaWallet').textContent = mayaWallet.toFixed(2);
+            document.getElementById('totalWallet').textContent = (gcashWallet + mayaWallet).toFixed(2);
+            document.getElementById('cashBalance').textContent = cashBalance.toFixed(2);
+            
+            // Compare cash balance with Bill & Coin Counter total and change color
+            updateCashBalanceColor();
+        }
+        
+        function updateCashBalanceColor() {
+            const cashBalanceElement = document.getElementById('cashBalance');
+            const counterTotal = getBillCoinCounterTotal();
+            
+            if (Math.abs(cashBalance - counterTotal) < 0.01) { // Use small tolerance for floating point comparison
+                cashBalanceElement.style.color = '#059669'; // Green when matching
+            } else {
+                cashBalanceElement.style.color = '#dc2626'; // Red when not matching
+            }
+        }
+        
+        function getBillCoinCounterTotal() {
+            // Get the total from Bill & Coin Counter localStorage
+            const counterData = localStorage.getItem('billCoinCounterData');
+            if (counterData) {
+                try {
+                    const data = JSON.parse(counterData);
+                    return data.total || 0;
+                } catch (e) {
+                    return 0;
+                }
+            }
+            return 0;
+        }
+
+        function addTransaction(platform, customer, transactionType, amount, profit) {
+            const transaction = {
+                id: Date.now(),
+                platform,
+                customer,
+                transactionType,
+                amount: parseFloat(amount),
+                profit: parseFloat(profit),
+                timestamp: new Date().toISOString()
+            };
+
+            transactions.push(transaction);
+
+            // Update wallet balances based on transaction type and platform
+            if (platform === 'GCash') {
+                if (transactionType === 'Cash-in') {
+                    gcashWallet -= amount;
+                    cashBalance += amount + profit;
+                } else if (transactionType === 'Cash-out') {
+                    gcashWallet += amount;
+                    cashBalance -= (amount - profit);
+                } else if (transactionType === 'Load' || transactionType === 'Bills') {
+                    gcashWallet -= amount;
+                    cashBalance += amount + profit;
+                }
+            } else if (platform === 'Maya') {
+                if (transactionType === 'Cash-in') {
+                    mayaWallet -= amount;
+                    cashBalance += amount + profit;
+                } else if (transactionType === 'Cash-out') {
+                    mayaWallet += amount;
+                    cashBalance -= (amount - profit);
+                } else if (transactionType === 'Load' || transactionType === 'Bills') {
+                    mayaWallet -= amount;
+                    cashBalance += amount + profit;
+                }
+            }
+
+            saveData();
+            return transaction;
+        }
+
+        function deleteTransaction(id) {
+            const transactionIndex = transactions.findIndex(t => t.id === id);
+            if (transactionIndex === -1) return;
+
+            const transaction = transactions[transactionIndex];
+            const { platform, transactionType, amount, profit } = transaction;
+
+            // Reverse the wallet balance changes
+            if (platform === 'GCash') {
+                if (transactionType === 'Cash-in') {
+                    gcashWallet += amount;
+                    cashBalance -= (amount + profit);
+                } else if (transactionType === 'Cash-out') {
+                    gcashWallet -= amount;
+                    cashBalance += (amount - profit);
+                } else if (transactionType === 'Load' || transactionType === 'Bills') {
+                    gcashWallet += amount;
+                    cashBalance -= (amount + profit);
+                }
+            } else if (platform === 'Maya') {
+                if (transactionType === 'Cash-in') {
+                    mayaWallet += amount;
+                    cashBalance -= (amount + profit);
+                } else if (transactionType === 'Cash-out') {
+                    mayaWallet -= amount;
+                    cashBalance += (amount - profit);
+                } else if (transactionType === 'Load' || transactionType === 'Bills') {
+                    mayaWallet += amount;
+                    cashBalance -= (amount + profit);
+                }
+            }
+
+            transactions.splice(transactionIndex, 1);
+            saveData();
+        }
+
+        function renderTransactions() {
+            const filterPlatform = document.getElementById('filterPlatform').value;
+            const filterTransactionType = document.getElementById('filterTransactionType').value;
+
+            let filteredTransactions = transactions;
+
+            if (filterPlatform) {
+                filteredTransactions = filteredTransactions.filter(t => t.platform === filterPlatform);
+            }
+
+            if (filterTransactionType) {
+                filteredTransactions = filteredTransactions.filter(t => t.transactionType === filterTransactionType);
+            }
+
+            const transactionsList = document.getElementById('transactionsList');
+            transactionsList.innerHTML = '';
+
+            if (filteredTransactions.length === 0) {
+                transactionsList.innerHTML = '<p style="text-align: center; color: #666;">No transactions found.</p>';
+                return;
+            }
+
+            filteredTransactions.reverse().forEach(transaction => {
+                const transactionDiv = document.createElement('div');
+                transactionDiv.className = 'transaction-item';
+                transactionDiv.innerHTML = `
+                    <button class="delete-btn" onclick="deleteTransaction(${transaction.id})" title="Delete transaction">×</button>
+                    <strong>${transaction.platform}</strong> - ${transaction.transactionType}<br>
+                    <strong>Customer:</strong> ${transaction.customer}<br>
+                    <strong>Amount:</strong> ₱${transaction.amount.toFixed(2)}<br>
+                    <strong>Profit:</strong> ₱${transaction.profit.toFixed(2)}<br>
+                    <strong>Date:</strong> ${new Date(transaction.timestamp).toLocaleString()}
+                `;
+                transactionsList.appendChild(transactionDiv);
+            });
+        }
+
+        function calculateSummary() {
+            const today = new Date().toDateString();
+            const todayTransactions = transactions.filter(t => new Date(t.timestamp).toDateString() === today);
+
+            const totalProfit = todayTransactions.reduce((sum, t) => sum + t.profit, 0);
+            const gcashProfit = todayTransactions.filter(t => t.platform === 'GCash').reduce((sum, t) => sum + t.profit, 0);
+            const mayaProfit = todayTransactions.filter(t => t.platform === 'Maya').reduce((sum, t) => sum + t.profit, 0);
+
+            document.getElementById('totalProfit').textContent = totalProfit.toFixed(2);
+            document.getElementById('gcashProfit').textContent = gcashProfit.toFixed(2);
+            document.getElementById('mayaProfit').textContent = mayaProfit.toFixed(2);
+            document.getElementById('totalTransactions').textContent = todayTransactions.length;
+
+            // Weekly summary
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            const weeklyTransactions = transactions.filter(t => new Date(t.timestamp) >= oneWeekAgo);
+
+            const weeklyTotalProfit = weeklyTransactions.reduce((sum, t) => sum + t.profit, 0);
+            const weeklyGcashProfit = weeklyTransactions.filter(t => t.platform === 'GCash').reduce((sum, t) => sum + t.profit, 0);
+            const weeklyMayaProfit = weeklyTransactions.filter(t => t.platform === 'Maya').reduce((sum, t) => sum + t.profit, 0);
+
+            document.getElementById('weeklyTotalProfit').textContent = weeklyTotalProfit.toFixed(2);
+            document.getElementById('weeklyGcashProfit').textContent = weeklyGcashProfit.toFixed(2);
+            document.getElementById('weeklyMayaProfit').textContent = weeklyMayaProfit.toFixed(2);
+            document.getElementById('weeklyTotalTransactions').textContent = weeklyTransactions.length;
+
+            // Transaction type breakdown
+            const cashinCount = todayTransactions.filter(t => t.transactionType === 'Cash-in').length;
+            const cashoutCount = todayTransactions.filter(t => t.transactionType === 'Cash-out').length;
+            const loadCount = todayTransactions.filter(t => t.transactionType === 'Load').length;
+            const billsCount = todayTransactions.filter(t => t.transactionType === 'Bills').length;
+
+            document.getElementById('cashinCount').textContent = cashinCount;
+            document.getElementById('cashoutCount').textContent = cashoutCount;
+            document.getElementById('loadCount').textContent = loadCount;
+            document.getElementById('billsCount').textContent = billsCount;
+        }
+
+        function renderApp() {
+            loadData();
+            updateFinancialDisplay();
+            renderTransactions();
+            calculateSummary();
+        }
+
+        // Calculate and suggest profit based on amount
+        function calculateSuggestedProfit() {
+            const amountInput = document.getElementById('amount');
+            const profitInput = document.getElementById('profit');
+            const amount = parseFloat(amountInput.value);
+            
+            if (!isNaN(amount) && amount > 0) {
+                // Profit calculation: Math.ceil(amount / 200) * 5, minimum 5
+                const suggestedProfit = Math.max(5, Math.ceil(amount / 200) * 5);
+                profitInput.value = suggestedProfit;
+            }
+        }
+
+        // Execute financial action based on dropdown selection
+        function executeFinancialAction() {
+            const action = document.getElementById('financialActions').value;
+            
+            if (!action) {
+                alert('Please select an action first.');
+                return;
+            }
+
+            switch(action) {
+                case 'addPlatformWallet':
+                    addFundToWallet();
+                    break;
+                case 'addCashBalance':
+                    addFundToCashBalance();
+                    break;
+                case 'withdrawCash':
+                    withdrawFromCash();
+                    break;
+                case 'transferCashToWallet':
+                    transferCashToWallet();
+                    break;
+                case 'transferBetweenPlatforms':
+                    transferBetweenPlatforms();
+                    break;
+                case 'exportTextReport':
+                    exportTextReport();
+                    break;
+                default:
+                    alert('Unknown action selected.');
+            }
+            
+            // Reset dropdown
+            document.getElementById('financialActions').value = '';
+        }
+
+        // Add fund to platform wallet
+        function addFundToWallet() {
+            const platformChoice = prompt('Enter platform choice:\n1 = GCash\n2 = Maya');
+            if (platformChoice === null) return; // User cancelled
+            
+            let platform;
+            if (platformChoice === '1') {
+                platform = 'GCash';
+            } else if (platformChoice === '2') {
+                platform = 'Maya';
+            } else {
+                alert('Please enter either "1" for GCash or "2" for Maya.');
+                return;
+            }
+            
+            const amount = prompt('Enter amount to add to ' + platform + ' Wallet (numbers only):');
+            if (amount === null) return; // User cancelled
+            
+            // Validate that input contains only numbers and decimal point
+            if (!/^\d*\.?\d+$/.test(amount.trim())) {
+                alert('Please enter a valid numeric amount (numbers only).');
+                return;
+            }
+            
+            const amountNum = parseFloat(amount);
+            if (isNaN(amountNum) || amountNum <= 0) {
+                alert('Please enter a valid positive amount.');
+                return;
+            }
+            
+            const { gcashWallet: currentGcash, mayaWallet: currentMaya, cashBalance: currentCash, financialActions: currentActions } = loadData();
+            
+            let newGcashWallet = currentGcash;
+            let newMayaWallet = currentMaya;
+            
+            if (platform === 'GCash') {
+                newGcashWallet += amountNum;
+            } else {
+                newMayaWallet += amountNum;
+            }
+            
+            // Save financial action for transparency
+            const newAction = {
+                type: 'Add Fund to Platform Wallet',
+                platform: platform,
+                amount: amountNum,
+                timestamp: new Date().toISOString(),
+                description: `Added ₱${amountNum.toFixed(2)} to ${platform} Wallet`
+            };
+            
+            const updatedActions = Array.isArray(currentActions) ? currentActions : [];
+            updatedActions.push(newAction);
+            
+            saveFinancialData(newGcashWallet, newMayaWallet, currentCash, updatedActions);
+            updateFinancialDisplay();
+            
+            const platformName = platform === 'GCash' ? 'GCash' : 'Maya';
+            alert(`₱${amountNum.toFixed(2)} added to ${platformName} Wallet successfully!`);
+        }
+
+        // Add fund directly to cash balance
+        function addFundToCashBalance() {
+            const amount = prompt('Enter amount to add to Cash Balance (numbers only):');
+            if (amount === null) return; // User cancelled
+            
+            // Validate that input contains only numbers and decimal point
+            if (!/^\d*\.?\d+$/.test(amount.trim())) {
+                alert('Please enter a valid numeric amount (numbers only).');
+                return;
+            }
+            
+            const amountNum = parseFloat(amount);
+            if (isNaN(amountNum) || amountNum <= 0) {
+                alert('Please enter a valid positive amount.');
+                return;
+            }
+            
+            // Ask for source of the funds
+            const source = prompt('Enter source of funds:');
+            if (source === null) return; // User cancelled
+            
+            if (source.trim() === '') {
+                alert('Please enter a source for the funds.');
+                return;
+            }
+            
+            const { gcashWallet, mayaWallet, cashBalance, financialActions } = loadData();
+            const newCashBalance = cashBalance + amountNum;
+            
+            // Save financial action for transparency
+            const newAction = {
+                type: 'Add Fund to Cash Balance',
+                amount: amountNum,
+                source: source.trim(),
+                timestamp: new Date().toISOString(),
+                description: `Added ₱${amountNum.toFixed(2)} directly to Cash Balance - Source: ${source.trim()}`
+            };
+            
+            const updatedActions = Array.isArray(financialActions) ? financialActions : [];
+            updatedActions.push(newAction);
+            
+            saveFinancialData(gcashWallet, mayaWallet, newCashBalance, updatedActions);
+            updateFinancialDisplay();
+            
+            alert(`₱${amountNum.toFixed(2)} added to Cash Balance successfully!\nSource: ${source.trim()}`);
+        }
+
+        // Withdraw from cash
+        function withdrawFromCash() {
+            const { gcashWallet, mayaWallet, cashBalance, financialActions } = loadData();
+            
+            if (cashBalance <= 0) {
+                alert('No cash balance available for withdrawal.');
+                return;
+            }
+            
+            const amount = prompt(`Enter amount to withdraw from Cash Balance (numbers only)\nAvailable: ₱${cashBalance.toFixed(2)}:`);
+            if (amount === null) return; // User cancelled
+            
+            // Validate that input contains only numbers and decimal point
+            if (!/^\d*\.?\d+$/.test(amount.trim())) {
+                alert('Please enter a valid numeric amount (numbers only).');
+                return;
+            }
+            
+            const amountNum = parseFloat(amount);
+            if (isNaN(amountNum) || amountNum <= 0) {
+                alert('Please enter a valid positive amount.');
+                return;
+            }
+            
+            if (amountNum > cashBalance) {
+                alert('Insufficient cash balance for this withdrawal.');
+                return;
+            }
+            
+            // Ask for reason or purpose
+            const reason = prompt('Enter reason or purpose for this withdrawal:');
+            if (reason === null) return; // User cancelled
+            
+            if (reason.trim() === '') {
+                alert('Please enter a reason for the withdrawal.');
+                return;
+            }
+            
+            const newCashBalance = cashBalance - amountNum;
+            
+            // Save financial action for transparency
+            const newAction = {
+                type: 'Withdraw from Cash',
+                amount: amountNum,
+                reason: reason.trim(),
+                timestamp: new Date().toISOString(),
+                description: `Withdrew ₱${amountNum.toFixed(2)} from Cash Balance - Reason: ${reason.trim()}`
+            };
+            
+            const updatedActions = Array.isArray(financialActions) ? financialActions : [];
+            updatedActions.push(newAction);
+            
+            saveFinancialData(gcashWallet, mayaWallet, newCashBalance, updatedActions);
+            updateFinancialDisplay();
+            
+            alert(`₱${amountNum.toFixed(2)} withdrawn from Cash Balance successfully!\nReason: ${reason.trim()}`);
+        }
+
+        // Transfer cash to wallet
+        function transferCashToWallet() {
+            const { gcashWallet, mayaWallet, cashBalance, financialActions } = loadData();
+            
+            if (cashBalance <= 0) {
+                alert('No cash balance available for transfer.');
+                return;
+            }
+            
+            const platformChoice = prompt('Enter platform choice to transfer to:\n1 = GCash\n2 = Maya');
+            if (platformChoice === null) return; // User cancelled
+            
+            let platform;
+            if (platformChoice === '1') {
+                platform = 'GCash';
+            } else if (platformChoice === '2') {
+                platform = 'Maya';
+            } else {
+                alert('Please enter either "1" for GCash or "2" for Maya.');
+                return;
+            }
+            
+            const amount = prompt(`Enter amount to transfer to ${platform} Wallet (numbers only)\nAvailable: ₱${cashBalance.toFixed(2)}:`);
+            if (amount === null) return; // User cancelled
+            
+            // Validate that input contains only numbers and decimal point
+            if (!/^\d*\.?\d+$/.test(amount.trim())) {
+                alert('Please enter a valid numeric amount (numbers only).');
+                return;
+            }
+            
+            const amountNum = parseFloat(amount);
+            if (isNaN(amountNum) || amountNum <= 0) {
+                alert('Please enter a valid positive amount.');
+                return;
+            }
+            
+            if (amountNum > cashBalance) {
+                alert('Insufficient cash balance for this transfer.');
+                return;
+            }
+            
+            let newGcashWallet = gcashWallet;
+            let newMayaWallet = mayaWallet;
+            const newCashBalance = cashBalance - amountNum;
+            
+            if (platform === 'GCash') {
+                newGcashWallet += amountNum;
+            } else {
+                newMayaWallet += amountNum;
+            }
+            
+            // Save financial action for transparency
+            const newAction = {
+                type: 'Transfer Cash to Wallet',
+                platform: platform,
+                amount: amountNum,
+                timestamp: new Date().toISOString(),
+                description: `Transferred ₱${amountNum.toFixed(2)} from Cash Balance to ${platform} Wallet`
+            };
+            
+            const updatedActions = Array.isArray(financialActions) ? financialActions : [];
+            updatedActions.push(newAction);
+            
+            saveFinancialData(newGcashWallet, newMayaWallet, newCashBalance, updatedActions);
+            updateFinancialDisplay();
+            
+            alert(`₱${amountNum.toFixed(2)} transferred to ${platform} Wallet successfully!`);
+        }
+
+        // Transfer between platforms
+        function transferBetweenPlatforms() {
+            const { gcashWallet, mayaWallet, cashBalance, financialActions } = loadData();
+            
+            const fromPlatformChoice = prompt('Enter source platform choice:\n1 = GCash\n2 = Maya');
+            if (fromPlatformChoice === null) return; // User cancelled
+            
+            let fromPlatform;
+            if (fromPlatformChoice === '1') {
+                fromPlatform = 'GCash';
+            } else if (fromPlatformChoice === '2') {
+                fromPlatform = 'Maya';
+            } else {
+                alert('Please enter either "1" for GCash or "2" for Maya.');
+                return;
+            }
+            
+            const toPlatform = fromPlatform === 'GCash' ? 'Maya' : 'GCash';
+            const sourceBalance = fromPlatform === 'GCash' ? gcashWallet : mayaWallet;
+            
+            if (sourceBalance <= 0) {
+                alert(`No balance available in ${fromPlatform} Wallet for transfer.`);
+                return;
+            }
+            
+            const amount = prompt(`Enter amount to transfer from ${fromPlatform} to ${toPlatform} (numbers only)\nAvailable: ₱${sourceBalance.toFixed(2)}:`);
+            if (amount === null) return; // User cancelled
+            
+            // Validate that input contains only numbers and decimal point
+            if (!/^\d*\.?\d+$/.test(amount.trim())) {
+                alert('Please enter a valid numeric amount (numbers only).');
+                return;
+            }
+            
+            const amountNum = parseFloat(amount);
+            if (isNaN(amountNum) || amountNum <= 0) {
+                alert('Please enter a valid positive amount.');
+                return;
+            }
+            
+            if (amountNum > sourceBalance) {
+                alert(`Insufficient balance in ${fromPlatform} Wallet for this transfer.`);
+                return;
+            }
+            
+            let newGcashWallet = gcashWallet;
+            let newMayaWallet = mayaWallet;
+            
+            if (fromPlatform === 'GCash') {
+                newGcashWallet -= amountNum;
+                newMayaWallet += amountNum;
+            } else {
+                newMayaWallet -= amountNum;
+                newGcashWallet += amountNum;
+            }
+            
+            // Save financial action for transparency
+            const newAction = {
+                type: 'Transfer between Platforms',
+                fromPlatform: fromPlatform,
+                toPlatform: toPlatform,
+                amount: amountNum,
+                timestamp: new Date().toISOString(),
+                description: `Transferred ₱${amountNum.toFixed(2)} from ${fromPlatform} Wallet to ${toPlatform} Wallet`
+            };
+            
+            const updatedActions = Array.isArray(financialActions) ? financialActions : [];
+            updatedActions.push(newAction);
+            
+            saveFinancialData(newGcashWallet, newMayaWallet, cashBalance, updatedActions);
+            updateFinancialDisplay();
+            
+            alert(`₱${amountNum.toFixed(2)} transferred from ${fromPlatform} to ${toPlatform} successfully!`);
+        }
+
+        // Export text report
+        function exportTextReport() {
+            const { transactions, gcashWallet, mayaWallet, cashBalance, financialActions } = loadData();
+            
+            let report = 'TRANSACTION TRACKER REPORT\n';
+            report += '================================\n\n';
+            
+            // Financial Overview
+            report += 'FINANCIAL OVERVIEW\n';
+            report += '------------------\n';
+            report += `GCash Wallet: ₱${gcashWallet.toFixed(2)}\n`;
+            report += `Maya Wallet: ₱${mayaWallet.toFixed(2)}\n`;
+            report += `Total Wallet: ₱${(gcashWallet + mayaWallet).toFixed(2)}\n`;
+            report += `Cash Balance: ₱${cashBalance.toFixed(2)}\n\n`;
+            
+            // Financial Actions
+            if (financialActions && financialActions.length > 0) {
+                report += 'FINANCIAL ACTIONS HISTORY\n';
+                report += '-------------------------\n';
+                financialActions.forEach((action, index) => {
+                    report += `${index + 1}. ${action.description}\n`;
+                    report += `   Date: ${new Date(action.timestamp).toLocaleString()}\n\n`;
+                });
+            }
+            
+            // Transactions
+            if (transactions.length > 0) {
+                report += 'ALL TRANSACTIONS\n';
+                report += '----------------\n';
+                transactions.forEach((transaction, index) => {
+                    report += `${index + 1}. ${transaction.platform} - ${transaction.transactionType}\n`;
+                    report += `   Customer: ${transaction.customer}\n`;
+                    report += `   Amount: ₱${transaction.amount.toFixed(2)}\n`;
+                    report += `   Profit: ₱${transaction.profit.toFixed(2)}\n`;
+                    report += `   Date: ${new Date(transaction.timestamp).toLocaleString()}\n\n`;
+                });
+            } else {
+                report += 'No transactions recorded.\n\n';
+            }
+            
+            // Summary
+            const today = new Date().toDateString();
+            const todayTransactions = transactions.filter(t => new Date(t.timestamp).toDateString() === today);
+            const totalProfit = todayTransactions.reduce((sum, t) => sum + t.profit, 0);
+            
+            report += 'TODAY\'S SUMMARY\n';
+            report += '---------------\n';
+            report += `Total Transactions: ${todayTransactions.length}\n`;
+            report += `Total Profit: ₱${totalProfit.toFixed(2)}\n`;
+            report += `Report Generated: ${new Date().toLocaleString()}\n`;
+            
+            // Create and download file
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `transaction-report-${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            alert('Text report exported successfully!');
+        }
+
+        // Export data
+        function exportData() {
+            const data = {
+                transactions,
+                gcashWallet,
+                mayaWallet,
+                cashBalance,
+                financialActions,
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `transaction-data-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+
+        // Import data
+        function importData() {
+            const fileInput = document.getElementById('importFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file to import.');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.transactions) {
+                        transactions = data.transactions;
+                        localStorage.setItem('transactions', JSON.stringify(transactions));
+                    }
+                    
+                    if (typeof data.gcashWallet === 'number') {
+                        gcashWallet = data.gcashWallet;
+                        localStorage.setItem('gcashWallet', gcashWallet.toString());
+                    }
+                    
+                    if (typeof data.mayaWallet === 'number') {
+                        mayaWallet = data.mayaWallet;
+                        localStorage.setItem('mayaWallet', mayaWallet.toString());
+                    }
+                    
+                    if (typeof data.cashBalance === 'number') {
+                        cashBalance = data.cashBalance;
+                        localStorage.setItem('cashBalance', cashBalance.toString());
+                    }
+                    
+                    if (data.financialActions) {
+                        financialActions = data.financialActions;
+                        localStorage.setItem('financialActions', JSON.stringify(financialActions));
+                    }
+                    
+                    renderApp();
+                    alert('Data imported successfully!');
+                    fileInput.value = ''; // Clear the file input
+                } catch (error) {
+                    alert('Error importing data. Please check the file format.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+                localStorage.removeItem('transactions');
+                localStorage.removeItem('gcashWallet');
+                localStorage.removeItem('mayaWallet');
+                localStorage.removeItem('cashBalance');
+                localStorage.removeItem('financialActions');
+                
+                transactions = [];
+                gcashWallet = 0;
+                mayaWallet = 0;
+                cashBalance = 0;
+                financialActions = [];
+                
+                renderApp();
+                alert('All data cleared successfully!');
+            }
+        }
+
+        // Bill and Coin Counter Class
+        class BillCoinCounter {
+            constructor() {
+                this.denominations = {
+                    '1': { value: 1, type: 'coin', currentCount: 0, totalCount: 0 },
+                    '5': { value: 5, type: 'coin', currentCount: 0, totalCount: 0 },
+                    '10': { value: 10, type: 'coin', currentCount: 0, totalCount: 0 },
+                    '20-coin': { value: 20, type: 'coin', currentCount: 0, totalCount: 0 },
+                    '20-bill': { value: 20, type: 'bill', currentCount: 0, totalCount: 0 },
+                    '50': { value: 50, type: 'bill', currentCount: 0, totalCount: 0 },
+                    '100': { value: 100, type: 'bill', currentCount: 0, totalCount: 0 },
+                    '200': { value: 200, type: 'bill', currentCount: 0, totalCount: 0 },
+                    '500': { value: 500, type: 'bill', currentCount: 0, totalCount: 0 },
+                    '1000': { value: 1000, type: 'bill', currentCount: 0, totalCount: 0 }
+                };
+                
+                this.init();
+            }
+
+            init() {
+                this.loadFromStorage();
+                this.bindEvents();
+                this.updateAllDisplays();
+            }
+
+            // Load data from localStorage
+            loadFromStorage() {
+                const savedData = localStorage.getItem('billCoinCounterData');
+                if (savedData) {
+                    try {
+                        const data = JSON.parse(savedData);
+                        Object.keys(this.denominations).forEach(key => {
+                            if (data[key]) {
+                                this.denominations[key].totalCount = data[key].totalCount || 0;
+                                this.denominations[key].currentCount = data[key].currentCount || 0;
+                            }
+                        });
+                    } catch (error) {
+                        console.error('Error loading data from storage:', error);
+                    }
+                }
+            }
+
+            // Save data to localStorage
+            saveToStorage() {
+                try {
+                    localStorage.setItem('billCoinCounterData', JSON.stringify(this.denominations));
+                } catch (error) {
+                    console.error('Error saving data to storage:', error);
+                }
+            }
+
+            // Bind event listeners
+            bindEvents() {
+                // Increment buttons
+                document.querySelectorAll('.btn-increment').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const denomination = e.target.closest('.btn-increment').dataset.denomination;
+                        this.incrementCount(denomination);
+                    });
+                });
+
+                // Decrement buttons
+                document.querySelectorAll('.btn-decrement').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const denomination = e.target.closest('.btn-decrement').dataset.denomination;
+                        this.decrementCount(denomination);
+                    });
+                });
+
+                // Input field changes
+                document.querySelectorAll('.count-input').forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        const denomination = e.target.id.replace('count-', '');
+                        const value = parseInt(e.target.value) || 0;
+                        this.setCurrentCount(denomination, value);
+                    });
+
+                    // Allow negative values for subtraction
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'e' || e.key === 'E') {
+                            e.preventDefault();
+                        }
+                    });
+                });
+
+                // Save button
+                document.getElementById('saveBtn').addEventListener('click', () => {
+                    this.saveCounts();
+                });
+
+                // Clear button
+                document.getElementById('clearBtn').addEventListener('click', () => {
+                    this.showClearConfirmation();
+                });
+
+                // Modal buttons
+                document.getElementById('cancelBtn').addEventListener('click', () => {
+                    this.hideClearConfirmation();
+                });
+
+                document.getElementById('confirmBtn').addEventListener('click', () => {
+                    this.clearAll();
+                    this.hideClearConfirmation();
+                });
+
+                // Close modal on background click
+                document.getElementById('confirmModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'confirmModal') {
+                        this.hideClearConfirmation();
+                    }
+                });
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey || e.metaKey) {
+                        if (e.key === 's') {
+                            e.preventDefault();
+                            this.saveCounts();
+                        }
+                    }
+                    if (e.key === 'Escape') {
+                        this.hideClearConfirmation();
+                    }
+                });
+            }
+
+            // Increment count for a denomination
+            incrementCount(denomination) {
+                if (this.denominations[denomination]) {
+                    this.denominations[denomination].currentCount++;
+                    this.updateCurrentCountDisplay(denomination);
+                    this.updateGrandTotal();
+                    this.addButtonFeedback(event.target);
+                    
+                    // Update cash balance color in Transaction Tracker
+                    if (typeof updateCashBalanceColor === 'function') {
+                        updateCashBalanceColor();
+                    }
+                }
+            }
+
+            // Decrement count for a denomination
+            decrementCount(denomination) {
+                if (this.denominations[denomination]) {
+                    const currentCount = this.denominations[denomination].currentCount;
+                    const totalCount = this.denominations[denomination].totalCount;
+                    const denominationValue = this.denominations[denomination].value;
+                    
+                    // Calculate minimum allowed count (negative of saved total number of units)
+                    const minAllowedCount = -(totalCount / denominationValue);
+                    
+                    // Validate that current count won\'t go below the minimum allowed
+                    if (currentCount <= minAllowedCount) {
+                        const totalPesoAmount = totalCount * denominationValue;
+                        alert(`Cannot decrement ${denomination.replace(\'-\', \' \')} below ${minAllowedCount}. This would exceed the saved total of ₱${totalPesoAmount}.`);
+                        return;
+                    }
+                    
+                    this.denominations[denomination].currentCount--;
+                    this.updateCurrentCountDisplay(denomination);
+                    this.updateGrandTotal();
+                    this.addButtonFeedback(event.target);
+                    
+                    // Update cash balance color in Transaction Tracker
+                    if (typeof updateCashBalanceColor === \'function\') {
+                        updateCashBalanceColor();
+                    }
+                }
+            }
+
+            // Set current count for a denomination
+            setCurrentCount(denomination, count) {
+                if (this.denominations[denomination]) {
+                    this.denominations[denomination].currentCount = count;
+                    this.updateCurrentCountDisplay(denomination);
+                    this.updateGrandTotal();
+                }
+            }
+
+            // Update current count display
+            updateCurrentCountDisplay(denomination) {
+                const input = document.getElementById(`count-${denomination}`);
+                if (input) {
+                    input.value = this.denominations[denomination].currentCount;
+                }
+            }
+
+            // Update denomination total display
+            updateDenominationTotal(denomination) {
+                const totalElement = document.getElementById(`total-${denomination}`);
+                if (totalElement) {
+                    const total = this.denominations[denomination].totalCount * this.denominations[denomination].value;
+                    totalElement.textContent = `₱${total.toLocaleString()}`;
+                }
+            }
+
+            // Update grand total display
+            updateGrandTotal() {
+                let grandTotal = 0;
+                
+                // Add current counts
+                Object.values(this.denominations).forEach(denom => {
+                    grandTotal += (denom.currentCount * denom.value);
+                });
+                
+                // Add saved totals
+                Object.values(this.denominations).forEach(denom => {
+                    grandTotal += (denom.totalCount * denom.value);
+                });
+
+                document.getElementById('grandTotal').textContent = `₱${grandTotal.toLocaleString()}`;
+                
+                // Save total to localStorage for cash balance comparison
+                const counterData = {
+                    total: grandTotal,
+                    denominations: this.denominations
+                };
+                localStorage.setItem('billCoinCounterData', JSON.stringify(counterData));
+            }
+
+            // Update all displays
+            updateAllDisplays() {
+                Object.keys(this.denominations).forEach(denomination => {
+                    this.updateCurrentCountDisplay(denomination);
+                    this.updateDenominationTotal(denomination);
+                });
+                this.updateGrandTotal();
+            }
+
+            // Save current counts to totals
+            saveCounts() {
+                let hasChanges = false;
+                
+                Object.keys(this.denominations).forEach(denomination => {
+                    if (this.denominations[denomination].currentCount !== 0) {
+                        this.denominations[denomination].totalCount += this.denominations[denomination].currentCount;
+                        this.denominations[denomination].currentCount = 0;
+                        hasChanges = true;
+                    }
+                });
+
+                if (hasChanges) {
+                    this.saveToStorage();
+                    this.updateAllDisplays();
+                    this.showSaveSuccess();
+                } else {
+                    this.showNoChangesMessage();
+                }
+            }
+
+            // Clear all data
+            clearAll() {
+                Object.keys(this.denominations).forEach(denomination => {
+                    this.denominations[denomination].currentCount = 0;
+                    this.denominations[denomination].totalCount = 0;
+                });
+                
+                this.saveToStorage();
+                this.updateAllDisplays();
+                this.showClearSuccess();
+            }
+
+            // Show clear confirmation modal
+            showClearConfirmation() {
+                document.getElementById('confirmModal').classList.add('show');
+            }
+
+            // Hide clear confirmation modal
+            hideClearConfirmation() {
+                document.getElementById('confirmModal').classList.remove('show');
+            }
+
+            // Add visual feedback for button presses
+            addButtonFeedback(button) {
+                button.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    button.style.transform = '';
+                }, 150);
+            }
+
+            // Show save success message
+            showSaveSuccess() {
+                this.showToast('Counts saved successfully!', 'success');
+            }
+
+            // Show clear success message
+            showClearSuccess() {
+                this.showToast('All data cleared successfully!', 'success');
+            }
+
+            // Show no changes message
+            showNoChangesMessage() {
+                this.showToast('No changes to save', 'info');
+            }
+
+            // Show toast notification
+            showToast(message, type = 'info') {
+                // Remove existing toast
+                const existingToast = document.querySelector('.toast');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+
+                // Create toast element
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.textContent = message;
+                
+                // Add toast styles
+                Object.assign(toast.style, {
+                    position: 'fixed',
+                    top: '20px',
+                    right: '20px',
+                    padding: '12px 20px',
+                    borderRadius: '8px',
+                    color: 'white',
+                    fontWeight: '600',
+                    zIndex: '1001',
+                    transform: 'translateX(100%)',
+                    transition: 'transform 0.3s ease',
+                    maxWidth: '300px',
+                    wordWrap: 'break-word'
+                });
+
+                // Set background color based on type
+                switch (type) {
+                    case 'success':
+                        toast.style.background = '#10b981';
+                        break;
+                    case 'error':
+                        toast.style.background = '#ef4444';
+                        break;
+                    case 'info':
+                    default:
+                        toast.style.background = '#2563eb';
+                        break;
+                }
+
+                // Add to document
+                document.body.appendChild(toast);
+
+                // Animate in
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(0)';
+                }, 100);
+
+                // Remove after delay
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+        }
+
+        // Initialize Bill & Coin Counter
+        function initializeBillCoinCounter() {
+            if (!billCoinCounter) {
+                billCoinCounter = new BillCoinCounter();
+            }
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Transaction Tracker
+            renderApp();
+
+            // Set up tab event listeners
+            document.getElementById('tracker-tab-btn').addEventListener('click', () => {
+                switchTab('tracker');
+            });
+
+            document.getElementById('counter-tab-btn').addEventListener('click', () => {
+                switchTab('counter');
+            });
+
+            // Set up Transaction Tracker event listeners
+            document.getElementById('transactionForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const platform = document.getElementById('platform').value;
+                const customer = document.getElementById('customer').value;
+                const transactionType = document.getElementById('transactionType').value;
+                const amount = parseFloat(document.getElementById('amount').value);
+                const profit = parseFloat(document.getElementById('profit').value);
+
+                if (amount <= 0 || profit < 0) {
+                    alert('Please enter valid amounts.');
+                    return;
+                }
+
+                addTransaction(platform, customer, transactionType, amount, profit);
+                
+                const form = e.target;
+                form.reset(); // Clear the form
+                renderApp(); // Re-render the list and summary
+            });
+
+            // Handle common amounts dropdown
+            document.getElementById('commonAmounts').addEventListener('change', function() {
+                const amountInput = document.getElementById('amount');
+                if (this.value) {
+                    amountInput.value = this.value;
+                    // Trigger profit calculation when common amount is selected
+                    calculateSuggestedProfit();
+                }
+            });
+
+            // Handle amount input changes for profit suggestion
+            document.getElementById('amount').addEventListener('input', calculateSuggestedProfit);
+            document.getElementById('amount').addEventListener('change', calculateSuggestedProfit);
+
+            // Handle filters
+            document.getElementById('filterPlatform').addEventListener('change', renderApp);
+            document.getElementById('filterTransactionType').addEventListener('change', renderApp);
+
+            // Set up financial action buttons
+            document.getElementById('executeActionBtn').addEventListener('click', executeFinancialAction);
+            document.getElementById('exportDataBtn').addEventListener('click', exportData);
+            document.getElementById('importDataBtn').addEventListener('click', importData);
+            document.getElementById('clearAllDataBtn').addEventListener('click', clearAllData);
+        });
+    </script>
+</body>
+</html>
+

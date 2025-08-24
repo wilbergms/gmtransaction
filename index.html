@@ -1,18 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="manifest" href="manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaction Tracker</title>
+    <title>Financial Management Suite</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
+        /* Tab System Styles */
+        .tab-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .tab-header {
+            display: flex;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 16px 24px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-button.active {
+            background: white;
             color: #333;
         }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #2563eb;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Transaction Tracker Styles */
+        .tracker-content {
+            padding: 20px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
         .container {
             max-width: 600px;
             margin: 0 auto;
@@ -21,15 +85,18 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         h1, h2 {
             text-align: center;
             color: #333;
         }
+
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
         }
+
         input[type="text"],
         input[type="number"],
         select {
@@ -40,6 +107,7 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
+
         button {
             background-color: #007bff;
             color: white;
@@ -49,15 +117,1182 @@
             cursor: pointer;
             width: 100%;
             font-size: 16px;
+            margin-bottom: 10px;
         }
+
         button:hover {
             background-color: #0056b3;
         }
-        .form-section {
-            margin-bottom: 20px;
+
+        .summary {
+            background-color: #e9f7ef;
             padding: 15px;
-            border: 1px solid #eee;
-            border-radius: 5px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .transaction-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+            position: relative;
+        }
+
+        .transaction-item .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .transaction-item .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .financial-overview {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filters label {
+            margin-bottom: 5px;
+        }
+
+        .filters select {
+            width: auto;
+            min-width: 120px;
+        }
+
+        /* Bill & Coin Counter Styles */
+        .counter-content {
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 600px;
+        }
+
+        .counter-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #2563eb;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .header h1 i {
+            margin-right: 12px;
+            color: #f59e0b;
+        }
+
+        .total-display {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            display: inline-block;
+            font-size: 1.25rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .total-label {
+            margin-right: 8px;
+        }
+
+        .total-amount {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .denomination-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .denomination-section h2 {
+            font-size: 1.5rem;
+            color: #374151;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .denomination-section h2 i {
+            margin-right: 12px;
+            color: #2563eb;
+        }
+
+        .denomination-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        /* Denomination Item */
+        .denomination-item {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .denomination-item:hover {
+            border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .denomination-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .denomination-label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 1.1rem;
+        }
+
+        .denomination-total {
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Counter Controls */
+        .counter-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-decrement,
+        .btn-increment {
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 50%;
+            background: #2563eb;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-decrement:hover,
+        .btn-increment:hover {
+            background: #1d4ed8;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-decrement:active,
+        .btn-increment:active {
+            transform: scale(0.95);
+        }
+
+        .count-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+            font-weight: 600;
+            background: white;
+            transition: border-color 0.2s ease;
+        }
+
+        .count-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .btn-save,
+        .btn-clear {
+            flex: 1;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-save:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-clear:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-content h3 {
+            color: #374151;
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+        }
+
+        .modal-content p {
+            color: #6b7280;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-cancel,
+        .btn-confirm {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-cancel:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-confirm {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background: #dc2626;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile Responsive Design */
+        @media (max-width: 768px) {
+            .tab-container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+            
+            .tab-button {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+            
+            .counter-container {
+                padding: 16px;
+            }
+            
+            .header {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .total-display {
+                font-size: 1.1rem;
+                padding: 14px 20px;
+            }
+            
+            .total-amount {
+                font-size: 1.3rem;
+            }
+            
+            .denomination-section {
+                padding: 20px;
+            }
+            
+            .denomination-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .denomination-item {
+                padding: 16px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .modal-content {
+                padding: 24px;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tab-container">
+        <!-- Tab Header -->
+        <div class="tab-header">
+            <button class="tab-button active" id="tracker-tab-btn">
+                <i class="fas fa-exchange-alt"></i> Transaction Tracker
+            </button>
+            <button class="tab-button" id="counter-tab-btn">
+                <i class="fas fa-coins"></i> Bill & Coin Counter
+            </button>
+        </div>
+
+        <!-- Transaction Tracker Tab -->
+        <div id="tracker-tab" class="tab-content active">
+            <div class="tracker-content">
+                <div class="container">
+                    <h1>Transaction Tracker</h1>
+
+                    <div class="form-section">
+                        <h2>Record New Transaction</h2>
+                        <form id="transactionForm">
+                            <label for="platform">Platform:</label>
+                            <select id="platform" name="platform" required>
+                                <option value="GCash">GCash</option>
+                                <option value="Maya">Maya</option>
+                            </select>
+
+                            <label for="customer">Customer (Name or Number):</label>
+                            <input type="text" id="customer" name="customer" placeholder="Enter name or number" required>
+
+                            <label for="transactionType">Transaction Type:</label>
+                            <select id="transactionType" name="transactionType" required>
+                                <option value="Cash-in">Cash-in</option>
+                                <option value="Cash-out">Cash-out</option>
+                                <option value="Load">Load</option>
+                                <option value="Bills">Bills</option>
+                            </select>
+
+                            <label for="amount">Amount (₱):</label>
+                            <input type="number" id="amount" name="amount" step="0.01" required>
+                            <select id="commonAmounts" style="width: 100%; margin-top: 5px;">
+                                <option value="">Select common amount</option>
+                                <option value="20">₱20</option>
+                                <option value="50">₱50</option>
+                                <option value="100">₱100</option>
+                                <option value="500">₱500</option>
+                                <option value="1000">₱1000</option>
+                            </select>
+
+                            <label for="profit">Profit (₱):</label>
+                            <input type="number" id="profit" name="profit" step="0.01" required>
+
+                            <button type="submit">Add Transaction</button>
+                        </form>
+                    </div>
+
+                    <div class="financial-overview">
+                        <h2>Financial Overview</h2>
+                        <p><strong>GCash Wallet:</strong> ₱<span id="gcashWallet">0.00</span></p>
+                        <p><strong>Maya Wallet:</strong> ₱<span id="mayaWallet">0.00</span></p>
+                        <p><strong>Total Wallet:</strong> ₱<span id="totalWallet">0.00</span></p>
+                        <p><strong>Cash Balance:</strong> ₱<span id="cashBalance">0.00</span></p>
+                    </div>
+
+                    <div class="summary">
+                        <h2>Today's Summary</h2>
+                        <p><strong>Total Profit:</strong> ₱<span id="totalProfit">0.00</span></p>
+                        <p><strong>GCash Profit:</strong> ₱<span id="gcashProfit">0.00</span></p>
+                        <p><strong>Maya Profit:</strong> ₱<span id="mayaProfit">0.00</span></p>
+                        <p><strong>Total Transactions:</strong> <span id="totalTransactions">0</span></p>
+                    </div>
+
+                    <div class="summary">
+                        <h2>This Week's Summary</h2>
+                        <p><strong>Total Profit:</strong> ₱<span id="weeklyTotalProfit">0.00</span></p>
+                        <p><strong>GCash Profit:</strong> ₱<span id="weeklyGcashProfit">0.00</span></p>
+                        <p><strong>Maya Profit:</strong> ₱<span id="weeklyMayaProfit">0.00</span></p>
+                        <p><strong>Total Transactions:</strong> <span id="weeklyTotalTransactions">0</span></p>
+                    </div>
+
+                    <div class="summary">
+                        <h2>Transaction Type Breakdown (Today)</h2>
+                        <p><strong>Cash-in:</strong> <span id="cashinCount">0</span> transactions</p>
+                        <p><strong>Cash-out:</strong> <span id="cashoutCount">0</span> transactions</p>
+                        <p><strong>Load:</strong> <span id="loadCount">0</span> transactions</p>
+                        <p><strong>Bills:</strong> <span id="billsCount">0</span> transactions</p>
+                    </div>
+
+                    <h2>All Transactions</h2>
+
+                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <h3>Data Management</h3>
+                        
+                        <label for="financialActions" style="color: #28a745; font-weight: bold;">Financial Actions:</label>
+                        <select id="financialActions" style="margin-bottom: 10px;">
+                            <option value="">Select an action...</option>
+                            <option value="addPlatformWallet">Add Fund to Platform Wallet</option>
+                            <option value="addCashBalance">Add Fund to Cash Balance</option>
+                            <option value="withdrawCash">Withdraw from Cash</option>
+                            <option value="tra            left: 0;
+            right: 0;
+            height: 3px;
+            background: #2563eb;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Transaction Tracker Styles */
+        .tracker-content {
+            padding: 20px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .summary {
+            background-color: #e9f7ef;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .transaction-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+            position: relative;
+        }
+
+        .transaction-item .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .transaction-item .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .financial-overview {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filters label {
+            margin-bottom: 5px;
+        }
+
+        .filters select {
+            width: auto;
+            min-width: 120px;
+        }
+
+        /* Bill & Coin Counter Styles */
+        .counter-content {
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 600px;
+        }
+
+        .counter-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #2563eb;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .header h1 i {
+            margin-right: 12px;
+            color: #f59e0b;
+        }
+
+        .total-display {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            display: inline-block;
+            font-size: 1.25rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .total-label {
+            margin-right: 8px;
+        }
+
+        .total-amount {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .denomination-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .denomination-section h2 {
+            font-size: 1.5rem;
+            color: #374151;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .denomination-section h2 i {
+            margin-right: 12px;
+            color: #2563eb;
+        }
+
+        .denomination-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        /* Denomination Item */
+        .denomination-item {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .denomination-item:hover {
+            border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .denomination-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .denomination-label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 1.1rem;
+        }
+
+        .denomination-total {
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Counter Controls */
+        .counter-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-decrement,
+        .btn-increment {
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 50%;
+            background: #2563eb;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-decrement:hover,
+        .btn-increment:hover {
+            background: #1d4ed8;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-decrement:active,
+        .btn-increment:active {
+            transform: scale(0.95);
+        }
+
+        .count-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+            font-weight: 600;
+            background: white;
+            transition: border-color 0.2s ease;
+        }
+
+        .count-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .btn-save,
+        .btn-clear {
+            flex: 1;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-save:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-clear:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-content h3 {
+            color: #374151;
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+        }
+
+        .modal-content p {
+            color: #6b7280;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-cancel,
+        .btn-confirm {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-cancel:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-confirm {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background: #dc2626;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile Responsive Design */
+        @media (max-width: 768px) {
+            .tab-container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+            
+            .tab-button {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+            
+            .counter-container {
+                padding: 16px;
+            }
+            
+            .header {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .total-display {
+                font-size: 1.1rem;
+                padding: 14px 20px;
+            }
+            
+            .total-amount {
+                font-size: 1.3rem;
+            }
+            
+            .denomination-section {
+                padding: 20px;
+            }
+            
+            .denomination-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .denomination-item {
+                padding: 16px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .modal-content {
+                padding: 24px;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tab-container">
+        <!-- Tab Header -->
+        <div class="tab-header">
+            <button class="tab-button active" id="tracker-tab-btn">
+                <i class="fas fa-exchange-alt"></i> Transaction Tracker
+            </button>
+            <button class="tab-button" id="counter-tab-btn">
+                <i class="fas fa-coins"></i> Bill & Coin Counter
+            </button>
+        </div>
+
+        <!-- Transaction Tracker Tab -->
+        <div id="tracker-tab" class="tab-content active">
+            <div class="tracker-content">
+                <div class="container">
+                    <h1>Transaction Tracker</h1>
+
+                    <div class="form-section">
+                        <h2>Record New Transaction</h2>
+                        <form id="transactionForm">
+                            <label for="platform">Platform:</label>
+                            <select id="platform" name="platform" required>
+                                <option value="GCash">GCash</option>
+                                <option value="Maya">Maya</option>
+                            </select>
+
+                            <label for="customer">Customer (Name or Number):</label>
+                            <input type="text" id="customer" name="customer" placeholder="Enter name or number" required>
+
+                            <label for="transactionType">Transaction Type:</label>
+                            <select id="transactionType" name="transactionType" required>
+                                <option value="Cash-in">Cash-in</option>
+                                <option value="Cash-out">Cash-out</option>
+                                <option value="Load">Load</option>
+                                <option value="Bills">Bills</option>
+                            </select>
+
+                            <label for="amount">Amount (₱):</label>
+                            <input type="number" id="amount" name="amount" step="0.01" required>
+                            <select id="commonAmounts" style="width: 100%; margin-top: 5px;">
+                                <option value="">Select common amount</option>
+                                <option value="20">₱20</option>
+                                <option value="50">₱50</option>
+                                <option value="100">₱100</option>
+                                <option value="500">₱500</option>
+                                <option value="1000">₱1000</option>
+                            </select>
+
+                            <label for="profit">Profit (₱):</label>
+                            <input type="number" id="profit" name="profit" step="0.01" required>
+
+                            <button type="submit">Add Transaction</button>
+                        </form>
+                    </div>
+
+                    <div class="financial-overview">
+                        <h2>Financial Overview</h2>
+                        <p><strong>GCash Wallet:</strong> ₱<span id="gcashWallet">0.00</span></p>
+                        <p><strong>Maya Wallet:</strong> ₱<span id="mayaWallet">0.00</span></p>
+                        <p><strong>Total Wallet:</strong> ₱<span id="totalWallet">0.00</span></p>
+                        <p><strong>Cash Balance:</strong> ₱<span id="cashBalance">0.00</span></p>
+                    </div>
+
+                    <div class="summary">
+                        <h2>Today's Summary</h2>
+                        <p><strong>Total Profit:</strong> ₱<span id="totalProfit">0.00</span></p>
+                        <p><strong>GCash Profit:</strong> ₱<span id="gcashProfit">0.00</span></p>
+                        <p><strong>Maya Profit:</strong> ₱<span id="mayaProfit">0.00</span></p>
+                        <p><strong>Total Transactions:</strong> <span id="totalTransactions">0</span></p>
+                    </div>
+
+                    <div class="summary">
+                        <h2>This Week's Summary</h2>
+                        <p><strong>Total Profit:</strong> ₱<span id="weeklyTotalProfit">0.00</span></p>
+                        <p><strong>GCash Profit:</strong> ₱<span id="weeklyGcashProfit">0.00</span></p>
+                        <p><strong>Maya Profit:</strong> ₱<span id="weeklyMayaProfit">0.00</span></p>
+                        <p><strong>Total Transactions:</strong> <span id="weeklyTotalTransactions">0</span></p>
+                    </div>
+
+                    <div class="summary">
+                        <h2>Transaction Type Breakdown (Today)</h2>
+                        <p><strong>Cash-in:</strong> <span id="cashinCount">0</span> transactions</p>
+                        <p><strong>Cash-out:</strong> <span id="cashoutCount">0</span> transactions</p>
+                        <p><strong>Load:</strong> <span id="loadCount">0</span> transactions</p>
+                        <p><strong>Bills:</strong> <span id="billsCount">0</span> transactions</p>
+                    </div>
+
+                    <h2>All Transactions</h2>
+
+                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <h3>Data Management</h3>
+                        
+                        <label for="financialActions" style="color: #28a745; font-weight: bold;">Financial Actions:</label>
+                        <select id="financialActions" style="margin-bottom: 10px;">
+                            <option value="">Select an action...</option>
+                            <option value="addPlatformWallet">Add Fund to Platform Wallet</option>
+                            <option value="addCashBalance">Add Fund to Cash Balance</option>
+                            <option value="withdrawCash">Withdraw from Cash</option>
+                            <option value="tra            border-radius: 5px;
             background-color: #fdfdfd;
         }
         #transactionList, #summaryView {
@@ -819,5 +2054,5 @@
     // Initial render when the page loads
     document.addEventListener('DOMContentLoaded', renderApp);
 </script>
-
-
+</body>
+</html>
